@@ -663,6 +663,7 @@
                 <textarea id="editProgramDetail" rows="3" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" placeholder="请输入项目特色和详细介绍"></textarea>
             </div>
             <input type="hidden" id="editProgramIndex" value="">
+            <input type="hidden" id="editProgramId">
             <button class="btn btn-blue" style="width: 100%;" onclick="saveProgramEdit()">保存</button>
         </div>
     </div>
@@ -1158,191 +1159,7 @@
 
         //项目数据（课程）是静态前端数据，需要改为动态
 
-        var programData = [
-    // -------------------------------
-    // 1. 预科阶段课程（Foundation / Diploma）
-    // -------------------------------
-    [
-        {
-            name: '服装设计与产品开发预科',
-            duration: '4.5个月',
-            fee: 'SGD 28,500（含税）',
-            intake: '全年滚动',
-            quota: '20人（最低开课人数）',
-            detail: '进入服装设计、产品开发方向的基础课程，包含版型、缝纫、数字绘图、立裁等核心技能。'
-        },
-        {
-            name: '商务管理预科（Diploma in Business Management）',
-            duration: '420小时（约4-6个月）',
-            fee: 'SGD 21,800（含税）',
-            intake: '全年滚动',
-            quota: '25人',
-            detail: '包含9大模块，涵盖商业基础、财务会计、数字商务、AI在管理中的应用等。'
-        },
-        {
-            name: '庭步苏国际中学 A-Level 高中课程',
-            duration: 'AS（高二）+ A2（高三）2年',
-            fee: 'AS: SGD 35,800；A2: SGD 35,800',
-            intake: '每年 1 月、7 月',
-            quota: '25人',
-            detail: '1+2 模式：国内高中一年 + 新加坡庭步苏国际中学 A-Level，两年直升新/港/英名校。'
-        },
-        {
-            name: 'A-Level 高三预科（商科方向）',
-            duration: '1年',
-            fee: 'SGD 21,800',
-            intake: '每年 1 月/7 月',
-            quota: '25人',
-            detail: '商科A-Level预科，进入商科国际大一（萨里大学、格拉斯哥大学）专用。'
-        },
-        {
-            name: 'A-Level 高三预科（艺术方向）',
-            duration: '1年',
-            fee: 'SGD 28,500',
-            intake: '每年 1 月/7 月',
-            quota: '20人',
-            detail: '艺术类本科方向的预科课程，包含素描、设计基础、作品集辅导。'
-        }
-    ],
-
-    // -------------------------------
-    // 2. Diploma 阶段课程（Diploma / Advanced Diploma）
-    // -------------------------------
-    [
-        {
-            name: '服装设计与产品开发文凭（Diploma in Apparel Design and Product Development）',
-            duration: '10-12个月',
-            fee: 'SGD 19,500（庭步苏高中/预科生）/ SGD 42,900（国际学生）',
-            modules: '约20+模块',
-            quota: '20人',
-            detail: '包含版型、缝纫、立裁、纺织、数字绘图、质量管理、虚拟样品制作等。'
-        },
-        {
-            name: '时尚技术国际大一（Advanced Diploma in Fashion Technology）',
-            duration: '12个月',
-            fee: 'SGD 42,900',
-            modules: '25个模块',
-            quota: '25人',
-            detail: '直升 Kingston 的 Fashion Promotion & Communication 或 UAL LCF 时尚设计与开发。'
-        },
-        {
-            name: '商务管理国际大一（Advanced Diploma in Business Management）',
-            duration: '420小时（约4-6个月）',
-            fee: 'SGD 21,800',
-            modules: '7大核心模块',
-            quota: '30人',
-            detail: '包含战略领导、变革管理、商法、AI驱动创新等高级商业课程。'
-        }
-    ],
-
-    // -------------------------------
-    // 3. 本科阶段课程（BA / Top-up / 直升）
-    // -------------------------------
-    [
-        {
-            name: '时尚推广与传播本科（BA Hons Fashion Promotion & Communication）',
-            duration: '2年（直升二年级）',
-            fee: '第二年 SGD 40,500；第三年 SGD 42,000',
-            partner: '英国 Kingston University London',
-            quota: '25人',
-            detail: '专注时尚品牌营销、视觉传播、内容制作、时尚媒体与品牌战略。'
-        },
-        {
-            name: '时尚设计与开发本科（BA Hons Fashion Design & Development）',
-            duration: '2年（直升二年级）',
-            fee: '每年 31,500 英镑（以UAL最新费用为准）',
-            partner: '伦敦艺术大学 LCF',
-            quota: '20人',
-            detail: '全球排名领先的时尚设计本科，可选行业实习 DIPS/企业孵化/创意计算证书。'
-        },
-        {
-            name: '萨里大学（University of Surrey）商科本科路径',
-            duration: '2-3年',
-            fee: '大二 SGD 42,900；大三 SGD 42,900（英国本校 23,700 英镑）',
-            partner: 'University of Surrey',
-            quota: '30人',
-            detail: '通过庭步苏预科/国际大一，升读英国萨里大学商科本科。'
-        },
-        {
-            name: '格拉斯哥大学商科本科路径（University of Glasgow）',
-            duration: '3-4年',
-            fee: '大二 SGD 42,900；大三大四 GBP 26,580',
-            partner: 'University of Glasgow',
-            quota: '30人',
-            detail: '全球排名高，适合商科方向学生，通过国际大一直升本校大二/大三。'
-        }
-    ],
-
-        // -------------------------------
-    // 4. 研究生阶段课程（Masters）
-    // -------------------------------
-    [
-        {
-            name: '港城创新创业硕士项目',
-            duration: '12-18个月',
-            fee: 'HK$ 180,000-260,000',
-            partner: 'City University of Hong Kong',
-            quota: '20人',
-            detail: '香港城市大学创新创业方向，聚焦创新技术、科技创业、商业模式设计和大湾区创新生态。'
-        },
-        {
-            name: 'SUTD Human-Centred Design 硕士',
-            duration: '12个月',
-            fee: 'SGD 50,000-60,000',
-            partner: 'Singapore University of Technology and Design',
-            quota: '30人',
-            detail: 'SUTD与MIT合作体系，结合工程、设计、用户体验、人机交互与科技创新。'
-        },
-        {
-            name: '中文知识产权战略硕士',
-            duration: '12-18个月',
-            fee: 'SGD 35,000-45,000',
-            partner: 'Singapore University of Social Sciences (SUSS)',
-            quota: '20人',
-            detail: '中文授课，重点培养国际知识产权战略、企业专利体系、技术转移与跨境商业保护能力。'
-        },
-        {
-            name: '创新创业硕士（Warwick）',
-            duration: '12-18个月',
-            fee: '£32,000-40,000',
-            partner: 'University of Warwick',
-            quota: '15人',
-            detail: '由工程学院与商学院联合授课，培养具备创业、战略、创新管理能力的高端人才。'
-        }
-    ],
-
-    // -------------------------------
-    // 5. 博士阶段课程（PhD / Doctor）
-    // -------------------------------
-    [
-        {
-            name: '教育学博士（USC）',
-            duration: '3-5年',
-            fee: 'US$ 60,000-90,000',
-            partner: 'University of Southern California (USC)',
-            quota: '10人',
-            detail: '专注教育创新、教育政策、教育科技与学习科学，培养高级教育研究者和管理者。'
-        },
-        {
-            name: '整体教育学博士（Maharishi）',
-            duration: '3-4年',
-            fee: 'US$ 35,000-45,000',
-            partner: 'Maharishi International University',
-            quota: '10人',
-            detail: '围绕意识、心理、人类发展与整体教育体系，是国际教育中具有特色的方向。'
-        },
-        {
-            name: '工程博士（CityU）',
-            duration: '3-4年',
-            fee: 'HK$ 200,000-260,000',
-            partner: 'City University of Hong Kong',
-            quota: '15人',
-            detail: '面向工程技术、人工智能、计算机、机器人、材料工程等领域的科研与成果转化博士。'
-        }
-    ]
-
-];
-
+        var programData = [[], [], [], [], []];;
 
         var currentTab = 0;
         var tabTitles = ['预科阶段课程', 'Diploma阶段课程', '本科阶段课程', '研究生阶段课程', '博士阶段课程'];
@@ -1440,7 +1257,7 @@
 
                 // 6. 更新界面
                 updateUserUI();               // 更新用户相关信息
-                updateInterfaceForRole();     // 显示/隐藏管理员内容
+                // updateInterfaceForRole();     // 显示/隐藏管理员内容
 
             } catch (error) {
                 console.error("读取数据库用户数据失败:", error);
@@ -1457,31 +1274,6 @@
                 updateUserUI();
                 updateInterfaceForRole();
             }
-        }
-
-        async function loadProgramData() {
-            try {
-                const dbData = await database.get('programs');
-                if (dbData) {
-                    // 数据库有数据 → 使用数据库数据
-                    programData = [];
-                    for (let i = 0; i < 5; i++) {
-                        programData[i] = [];
-                        if (dbData[i]) {
-                            for (const key in dbData[i]) {
-                                programData[i].push({ id: key, ...dbData[i][key] });
-                            }
-                        }
-                    }
-                } else {
-                    // 数据库没有数据 → 使用前端死数据并写入数据库
-                    await saveAllProgramsToDB();
-                }
-            } catch (err) {
-                console.error("加载数据库项目失败，使用前端死数据", err);
-                await saveAllProgramsToDB();
-            }
-            renderTable();
         }
 
         // 保存所有前端死数据到数据库
@@ -2036,32 +1828,43 @@
             document.getElementById('editProgramModal').style.display = 'flex';
         }
 
-
+        function openEditProgramModal() {
+            document.getElementById('editProgramModal').style.display = 'flex';
+            document.getElementById('editProgramTitle').textContent = '编辑项目';
+        }
 
         // ================================
         // 编辑项目
         // ================================
-        function editProgram(index) {
-            const program = programData[currentTab][index];
+        function editProgram(programId) {
 
-            document.getElementById('editProgramTitle').textContent = '编辑项目';
-            document.getElementById('editProgramName').value = program.name || '';
-            document.getElementById('editProgramDuration').value = program.duration || '';
-            document.getElementById('editProgramFee').value = program.fee || '';
-            document.getElementById('editProgramQuota').value = program.quota || '';
-            document.getElementById('editProgramDetail').value = program.detail || '';
-            document.getElementById('editProgramIndex').value = index;
+            openEditProgramModal();
+            const tab = currentTab;
+            const item = programData[tab].find(p => p.id === programId);
+            
+            if (!item) {
+                alert("项目不存在");
+                return;
+            }
 
-            // 根据 currentTab 选择 extra 字段
-            let extraValue = '';
-            if (currentTab === 0) extraValue = program.intake || '';
-            if (currentTab === 1) extraValue = program.modules || '';
-            if (currentTab === 2) extraValue = program.partner || '';
-            if (currentTab === 3) extraValue = program.institution || '';
+            // 填充表单
+            document.getElementById('editProgramName').value = item.name || '';
+            document.getElementById('editProgramDuration').value = item.duration || '';
+            document.getElementById('editProgramFee').value = item.fee || '';
+            document.getElementById('editProgramQuota').value = item.quota || '';
+            document.getElementById('editProgramDetail').value = item.detail || '';
 
-            document.getElementById('editProgramExtra').value = extraValue;
+            // 根据 tab 设置 extra 字段
+            if (tab === 0) document.getElementById('editProgramExtra').value = item.intake || '';
+            else if (tab === 1) document.getElementById('editProgramExtra').value = item.modules || '';
+            else if (tab === 2) document.getElementById('editProgramExtra').value = item.partner || '';
+            else if (tab === 3) document.getElementById('editProgramExtra').value = item.institution || '';
+            else document.getElementById('editProgramExtra').value = '';
 
-            document.getElementById('editProgramModal').style.display = 'flex';
+            // 关键：存储 id，而不是 index！
+            document.getElementById('editProgramId').value = programId; // 新增一个隐藏字段
+            document.getElementById('editProgramIndex').value = ''; // 不再使用 index
+
         }
 
 
@@ -2076,39 +1879,42 @@
             const extra = document.getElementById('editProgramExtra').value.trim();
             const quota = document.getElementById('editProgramQuota').value.trim();
             const detail = document.getElementById('editProgramDetail').value.trim();
-            const index = document.getElementById('editProgramIndex').value;
+            const programId = document.getElementById('editProgramId').value; // ← 用 id
 
             if (!name || !duration || !fee || !quota || !detail) {
                 alert('请填写所有必填项');
                 return;
             }
 
-            const newProgram = { name, duration, fee, quota, detail };
+            const newProgram = { name, duration, fee, quota, detail, id: programId || safeUUID() };
 
             if (currentTab === 0) newProgram.intake = extra;
-            if (currentTab === 1) newProgram.modules = extra;
-            if (currentTab === 2) newProgram.partner = extra;
-            if (currentTab === 3) newProgram.institution = extra;
+            else if (currentTab === 1) newProgram.modules = extra;
+            else if (currentTab === 2) newProgram.partner = extra;
+            else if (currentTab === 3) newProgram.institution = extra;
 
-            let id;
-            if (index === '') {
-                // 新增
-                id = safeUUID();
-                newProgram.id = id;
-                programData[currentTab].push(newProgram);
+            const tab = currentTab;
+            const items = programData[tab];
+
+            if (programId) {
+                // 更新：查找并替换
+                const idx = items.findIndex(p => p.id === programId);
+                if (idx >= 0) {
+                    items[idx] = newProgram;
+                } else {
+                    // 未找到？当作新增
+                    items.push(newProgram);
+                }
             } else {
-                // 更新
-                id = programData[currentTab][index].id;
-                newProgram.id = id;
-                programData[currentTab][index] = newProgram;
+                // 新增
+                items.push(newProgram);
             }
 
-            // 写入数据库
+            // 同步到数据库
             const stageData = {};
-            programData[currentTab].forEach(prog => {
-                const pid = prog.id;
-                stageData[pid] = { ...prog };
-                delete stageData[pid].id;
+            items.forEach(prog => {
+                stageData[prog.id] = { ...prog };
+                delete stageData[prog.id].id; // 数据库存储不带 id
             });
             await database.set(`programs/${currentTab}`, stageData);
 
@@ -2117,12 +1923,16 @@
             showToast('项目已保存');
         }
 
+
         async function deleteProgram(index) {
             if (!confirm('确定要删除这个项目吗？')) return;
 
+            // 获取被删项的 id（用于后续可能的日志或校验）
+            const deletedId = programData[currentTab][index]?.id;
+
             programData[currentTab].splice(index, 1);
 
-            // 更新数据库
+            // 同步到数据库
             const stageData = {};
             programData[currentTab].forEach(prog => {
                 const pid = prog.id;
@@ -2239,14 +2049,22 @@
         function renderTable() {
             const data = programData[currentTab] || [];
 
-            // 如果没有数据
             if (data.length === 0) {
                 document.getElementById('tableArea').innerHTML =
                     '<p style="text-align:center;color:#888;margin-top:20px;">暂无项目数据</p>';
                 return;
             }
 
-            const keys = Object.keys(data[0]);
+            // 定义每个 tab 要显示的字段（按顺序）
+            const fieldConfigs = [
+                ['name', 'duration', 'fee', 'intake', 'quota'],          // tab 0: 预科
+                ['name', 'duration', 'fee', 'modules', 'quota'],         // tab 1: 文凭
+                ['name', 'duration', 'fee', 'partner', 'quota'],         // tab 2: 本科
+                ['name', 'duration', 'fee', 'institution', 'quota'],     // tab 3: 硕士
+                ['name', 'duration', 'fee', 'partner', 'quota']          // tab 4: 博士（假设用 partner）
+            ];
+
+            const fields = fieldConfigs[currentTab] || fieldConfigs[0];
 
             const headers = {
                 name: '项目名称',
@@ -2261,51 +2079,41 @@
 
             let html = '<table><thead><tr>';
 
-            keys.forEach(k => {
-                if (k !== 'detail') {
-                    html += `<th>${headers[k] || k}</th>`;
-                }
+            fields.forEach(k => {
+                html += `<th>${headers[k] || k}</th>`;
             });
 
-            if (currentUser && currentUser.role === 'admin') {
-                html += '<th style="width: 140px;">操作</th>';
+            if (currentUser?.role === 'admin') {
+                html += '<th>操作</th>';
             }
 
             html += '</tr></thead><tbody>';
 
             data.forEach((row, i) => {
+                html += `<tr onclick="showDetail(${currentTab}, ${i})">`;
 
-                // 整行点击（管理员 + 普通用户都正常打开详情）
-                html += `<tr onclick="showDetail(${currentTab},${i})">`;
-
-                keys.forEach(k => {
-                    if (k !== 'detail') {
-                        html += `<td>${row[k] ?? ''}</td>`;
-                    }
+                fields.forEach(k => {
+                    html += `<td>${row[k] ?? ''}</td>`;
                 });
 
-                // 管理员操作按钮
-                if (currentUser && currentUser.role === 'admin') {
+                if (currentUser?.role === 'admin') {
                     html += `
                         <td onclick="event.stopPropagation();">
-                            <button class="btn btn-blue btn-small"
-                                style="margin-right:5px"
-                                onclick="editProgram(${i}); event.stopPropagation();">
+                            <button class="btn btn-blue btn-small" style="margin-right:5px"
+                                onclick="editProgram('${row.id}', ${i}); event.stopPropagation();">
                                 编辑
                             </button>
                             <button class="btn btn-red btn-small"
-                                onclick="deleteProgram(${i}); event.stopPropagation();">
+                                onclick="deleteProgram('${row.id}'); event.stopPropagation();">
                                 删除
                             </button>
-                        </td>
-                    `;
+                        </td>`;
                 }
 
                 html += '</tr>';
             });
 
             html += '</tbody></table>';
-
             document.getElementById('tableArea').innerHTML = html;
         }
 
@@ -2770,9 +2578,44 @@
             }
         }
 
+        async function loadProgramData() {
+            
+            try {
+                const dbData = await database.get('programs');
+                programData = [[], [], [], [], []]; // 重置
+
+                console.log("原始数据库返回:", dbData);
+                console.log("typeof dbData:", typeof dbData);
+                console.log("dbData['0']:", dbData?.['0']);
+                console.log("dbData[0]:", dbData?.[0]); // 对比看是否 undefined
+
+                if (dbData && typeof dbData === 'object') {
+                    for (let tabIndex = 0; tabIndex < 5; tabIndex++) {
+                        const stage = dbData[tabIndex];
+                        if (stage && typeof stage === 'object') {
+                            for (const id in stage) {
+                                if (stage.hasOwnProperty(id)) {
+                                    programData[tabIndex].push({ id, ...stage[id] });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                renderTable();
+            } catch (err) {
+                console.error("❌ 加载课程数据失败:", err);
+                programData = [[], [], [], [], []];
+                renderTable();
+                alert("加载课程数据失败，请检查网络或联系管理员");
+            }
+        }
+
         window.addEventListener('load', async function () {
             console.log('🚀 页面加载完成，开始从 Firebase 获取合作院校和企业数据...');
 
+            await initAuthState();
+            await loadProgramData();
             try {
                 // 读取合作院校数据
                 const partners = await database.get("partnerLogos");
