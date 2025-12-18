@@ -9,6 +9,21 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
+    <!-- ✅ PDF.js (v2.16.105 - 最后一个带 build/pdf.min.js 的版本) -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
+    <script>
+        // 设置 workerSrc —— 必须与主库同版本
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+    </script>
+
+    <!-- ✅ Mammoth for DOCX -->
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.7.2/mammoth.browser.min.js"></script>
+
+    <!-- DOCX 解析（不受影响） -->
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.7.2/mammoth.browser.min.js"></script>
+
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; }
@@ -951,7 +966,6 @@
         var draggedElement = null;
         var draggedIndex = null;
         var draggedType = null;
-        const GEMINI_API_KEY = "AIzaSyCQlRnoMPCquYgmKB-VD3MBjJeVhm_Lais";
 
         /***************************************************
         * 用 Worker 代理 Firebase Database（全新 database 对象）
@@ -1662,7 +1676,7 @@
 
         function safeUUID() {
             if (crypto && crypto.randomUUID) {
-                return safeUUID();
+                return crypto.randomUUID();
             }
             // fallback
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -3038,61 +3052,121 @@
         }
     }
 
-
     // 上传简历
     async function uploadResume() {
         const fileInput = document.getElementById("resumeFile");
-        const file = fileInput?.files?.[0];
-
+        const file = fileInput.files[0];
+        
         if (!file) {
-            alert("请先选择一个文件");
+            alert("请选择一个简历文件（PDF 或 DOCX）");
             return;
         }
 
-        alert("Gemini 正在分析您的简历，分析完成后会弹窗显示信息，请稍作等待…");
+        if (!file.type.match(/(pdf|vnd.openxmlformats-officedocument.wordprocessingml.document)/)) {
+            alert("仅支持 PDF 或 DOCX 格式！");
+            return;
+        }
+
+        let text = "";
+        try {
+            if (file.type === "application/pdf") {
+            // 使用 PDF.js 提取文本
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = "";
+            const maxPages = Math.min(pdf.numPages, 10); // 防止太长
+            for (let i = 1; i <= maxPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                fullText += content.items.map(item => item.str).join(" ") + "\n";
+            }
+            text = fullText;
+            } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+            // 使用 Mammoth 提取 DOCX 文本
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            text = result.value;
+            } else {
+            throw new Error("不支持的文件类型");
+            }
+        } catch (err) {
+            console.error("文件解析失败:", err);
+            alert("简历文件解析失败，请确保格式正确。");
+            return;
+        }
+
+        if (!text.trim()) {
+            alert("未能从文件中提取到文本内容。");
+            return;
+        }
+
+        // ✅ 关键：现在只传纯文本给 Worker！
+        const requestPayload = {
+            contents: [{
+            parts: [{ text: text }]
+            }]
+        };
+
+        alert("正在分析您的简历，请稍候…");
 
         try {
-            const parsedInfo = await analyzeResumeWithGemini(file);
-            console.log("Gemini 分析结果：", parsedInfo);
+            const response = await fetch("https://tembusu.zhouqingyu27.workers.dev/gemini", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestPayload)
+            });
+
+            if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`分析失败 (${response.status}): ${errorText}`);
+            }
+
+            const result = await response.json();
+            let output = result?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+            // 清理可能的 ```json 包裹
+            output = output
+            .trim()
+            .replace(/^```json\s*/i, "")
+            .replace(/\s*```$/, "");
+
+            const parsedInfo = JSON.parse(output);
 
             const cleaned = {
-                name: parsedInfo.name || "",
-                birthday: parsedInfo.birthday || "",
-                email: parsedInfo.email || "",
-                phone: parsedInfo.phone || "",
-                education: parsedInfo.education || "",
-                program: parsedInfo.program || "",
-                major: parsedInfo.major || "",
-                university: parsedInfo.university || "",
-                agent: parsedInfo.agent || "",
-                fee_agent: parsedInfo.fee_agent || "",
-                fee_total: parsedInfo.fee_total || "",
-                goal: parsedInfo.goal || "",
-                can_apply: parsedInfo.can_apply || "no",
-                afford: parsedInfo.afford || "medium",
-                recommend_program: parsedInfo.recommend_program || "",
-                skills: parsedInfo.skills || "",
-                awards: parsedInfo.awards || "",
-                activities: parsedInfo.activities || "",
-                experience: parsedInfo.experience || [],
-                projects: parsedInfo.projects || []
+            name: parsedInfo.name || "",
+            birthday: parsedInfo.birthday || "",
+            email: parsedInfo.email || "",
+            phone: parsedInfo.phone || "",
+            education: parsedInfo.education || "",
+            program: parsedInfo.program || "",
+            major: parsedInfo.major || "",
+            university: parsedInfo.university || "",
+            agent: parsedInfo.agent || "",
+            fee_agent: parsedInfo.fee_agent || "",
+            fee_total: parsedInfo.fee_total || "",
+            goal: parsedInfo.goal || "",
+            can_apply: parsedInfo.can_apply || "no",
+            afford: parsedInfo.afford || "medium",
+            recommend_program: parsedInfo.recommend_program || "",
+            skills: parsedInfo.skills || "",
+            awards: parsedInfo.awards || "",
+            activities: parsedInfo.activities || "",
+            experience: parsedInfo.experience || [],
+            projects: parsedInfo.projects || []
             };
 
-            // 生成唯一 ID 模拟 push()
             const newId = safeUUID();
             await database.set(`students/${newId}`, cleaned);
-
-            // 打开详情页面
             openStudentDetail(newId, cleaned);
 
-            alert("上传成功！简历已分析并写入数据库！");
-            hideFileUpload();
+            alert("简历分析成功并已保存！");
+            fileInput.value = ""; // 清空文件选择
 
         } catch (error) {
-            console.error("上传或分析简历出错：", error);
-            alert("分析失败，请检查控制台");
+            console.error("❌ 分析失败:", error);
+            alert("分析失败：" + (error.message || "请检查控制台"));
         }
-    }
+        }
 
 
    // =============================================
